@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { idbSave } from "@/lib/idb";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,6 +35,7 @@ export default function LoginPage() {
       return;
     }
 
+    await idbSave({ session: session.trim(), authToken: authToken.trim() }, "auth");
     router.push("/");
     router.refresh();
   }
@@ -102,16 +104,23 @@ export default function LoginPage() {
           </button>
 
           {/* Instruções */}
-          <details className="mt-2">
+          <details className="mt-2" open>
             <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-400 select-none">
               Como obter os cookies?
             </summary>
-            <ol className="text-xs text-gray-500 space-y-1 mt-2 list-decimal list-inside">
-              <li>Faça login no 4Biz pelo navegador</li>
-              <li>Abra as ferramentas de desenvolvedor (F12)</li>
-              <li>Vá em <span className="text-gray-300">Application → Cookies</span></li>
-              <li>Copie <span className="font-mono text-gray-300">SESSION</span> e <span className="font-mono text-gray-300">HYPER-AUTH-TOKEN</span></li>
-            </ol>
+            <div className="mt-3 space-y-3">
+              <video
+                src="/tutorial.mp4"
+                controls
+                className="w-full rounded-lg border border-gray-700"
+              />
+              <ol className="text-xs text-gray-500 space-y-1 list-decimal list-inside">
+                <li>Faça login no 4Biz pelo navegador</li>
+                <li>Abra as ferramentas de desenvolvedor (F12)</li>
+                <li>Vá em <span className="text-gray-300">Application → Cookies</span></li>
+                <li>Copie <span className="font-mono text-gray-300">SESSION</span> e <span className="font-mono text-gray-300">HYPER-AUTH-TOKEN</span></li>
+              </ol>
+            </div>
           </details>
         </form>
       </div>
