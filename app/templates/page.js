@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function CloseTemplatePage() {
+export default function TemplatesPage() {
   redirect("/templates/close");
 }

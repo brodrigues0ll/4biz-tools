@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { idbLoad, idbSave } from "@/lib/idb";
+import { useSession } from "next-auth/react";
 
 // ── Template padrão ──────────────────────────────────────────────────────────
 
@@ -289,6 +290,10 @@ function useGroupSearch(session, authToken) {
 // ── Componente principal ─────────────────────────────────────────────────────
 
 export default function Home() {
+  const { data: sessionData } = useSession();
+  const canVerAvancado  = sessionData?.isAdmin || sessionData?.permissions?.abertura?.verAvancado;
+  const canCriacaoEmLote = sessionData?.isAdmin || sessionData?.permissions?.abertura?.criacaoEmLote;
+
   const [session, setSession]       = useState("");
   const [authToken, setAuthToken]   = useState("");
   const [patrimoniosText, setPatrimoniosText] = useState("");
@@ -647,10 +652,10 @@ export default function Home() {
       {/* Abas */}
       <div className="border-b border-gray-800 px-4 sm:px-6 flex gap-1 overflow-x-auto">
         {[
-          { id: "config",   label: "Configuração" },
-          { id: "template", label: "Avançado" },
-          { id: "results",  label: `Resultados${results.length ? ` (${results.length})` : ""}` },
-        ].map((tab) => (
+          { id: "config",   label: "Configuração",                              show: true },
+          { id: "template", label: "Avançado",                                  show: canVerAvancado },
+          { id: "results",  label: `Resultados${results.length ? ` (${results.length})` : ""}`, show: true },
+        ].filter((t) => t.show).map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
               activeTab === tab.id
@@ -867,7 +872,7 @@ export default function Home() {
             </section>
 
             {/* Texto do Chamado + Patrimônios */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 ${canCriacaoEmLote ? "sm:grid-cols-2" : ""} gap-4`}>
               <section className="bg-gray-900 rounded-xl p-4 border border-gray-800">
                 <h2 className="font-semibold text-white mb-1 text-sm">Texto do Chamado</h2>
                 <p className="text-xs text-gray-500 mb-3">
@@ -879,20 +884,34 @@ export default function Home() {
                 />
               </section>
 
-              <section className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                <h2 className="font-semibold text-white mb-1 text-sm">Números de Patrimônio</h2>
-                <p className="text-xs text-gray-500 mb-3">Um por linha.</p>
-                <textarea value={patrimoniosText} onChange={(e) => setPatrimoniosText(e.target.value)}
-                  placeholder={"14345954\n98765432\n11223344"}
-                  rows={10}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono text-gray-100 focus:outline-none focus:border-blue-500 resize-y"
-                />
-                {patrimonios.length > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    {patrimonios.length} patrimônio{patrimonios.length !== 1 ? "s" : ""}
-                  </p>
-                )}
-              </section>
+              {canCriacaoEmLote ? (
+                <section className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+                  <h2 className="font-semibold text-white mb-1 text-sm">Números de Patrimônio</h2>
+                  <p className="text-xs text-gray-500 mb-3">Um por linha.</p>
+                  <textarea value={patrimoniosText} onChange={(e) => setPatrimoniosText(e.target.value)}
+                    placeholder={"14345954\n98765432\n11223344"}
+                    rows={10}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono text-gray-100 focus:outline-none focus:border-blue-500 resize-y"
+                  />
+                  {patrimonios.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {patrimonios.length} patrimônio{patrimonios.length !== 1 ? "s" : ""}
+                    </p>
+                  )}
+                </section>
+              ) : (
+                <section className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+                  <h2 className="font-semibold text-white mb-1 text-sm">Número de Patrimônio</h2>
+                  <p className="text-xs text-gray-500 mb-3">Número do equipamento para o chamado.</p>
+                  <input
+                    type="text"
+                    value={patrimoniosText}
+                    onChange={(e) => setPatrimoniosText(e.target.value)}
+                    placeholder="Ex: 14345954"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono text-gray-100 focus:outline-none focus:border-blue-500"
+                  />
+                </section>
+              )}
             </div>
 
             {/* Base de Conhecimento */}

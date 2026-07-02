@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -443,6 +444,9 @@ function FilterModal({ schedules, filters, onApply, onClose }) {
 // ── Componente principal ──────────────────────────────────────────────────────
 
 export default function ScheduleListPage() {
+  const { data: session } = useSession();
+  const canEdit = session?.isAdmin || session?.permissions?.agendamentos?.editar;
+
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [runTarget, setRunTarget] = useState(null);
@@ -604,7 +608,7 @@ export default function ScheduleListPage() {
           </div>
         )}
 
-        <Link
+        {canEdit && <Link
           href="/schedule/new"
           className={`${schedules.length > 0 ? "" : "ml-auto"} px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5`}
         >
@@ -623,7 +627,7 @@ export default function ScheduleListPage() {
             />
           </svg>
           Novo Agendamento
-        </Link>
+        </Link>}
       </div>
 
       <div className="flex-1 p-4 sm:p-6 w-full">
@@ -638,26 +642,17 @@ export default function ScheduleListPage() {
             <div className="text-gray-500 text-sm mb-4">
               Nenhum agendamento criado ainda.
             </div>
-            <Link
-              href="/schedule/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+            {canEdit && (
+              <Link
+                href="/schedule/new"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Criar primeiro agendamento
-            </Link>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Criar primeiro agendamento
+              </Link>
+            )}
           </div>
         )}
 
@@ -774,7 +769,7 @@ export default function ScheduleListPage() {
                           </svg>
                         </button>
                         {/* Editar */}
-                        <Link
+                        {canEdit && <Link
                           href={`/schedule/${s._id}/edit`}
                           title="Editar"
                           className="p-1 text-gray-600 hover:text-blue-400 rounded hover:bg-blue-900/20 transition-colors"
@@ -793,9 +788,9 @@ export default function ScheduleListPage() {
                               d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 16H9v-3z"
                             />
                           </svg>
-                        </Link>
+                        </Link>}
                         {/* Excluir */}
-                        <button
+                        {canEdit && <button
                           onClick={() => handleDelete(s._id)}
                           title="Excluir"
                           className="p-1 text-gray-600 hover:text-red-400 rounded hover:bg-red-900/20 transition-colors"
@@ -814,7 +809,7 @@ export default function ScheduleListPage() {
                               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                             />
                           </svg>
-                        </button>
+                        </button>}
                       </div>
 
                       {/* Toggle ativo */}

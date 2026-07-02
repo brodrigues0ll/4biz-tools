@@ -17,7 +17,7 @@ export default async function RootLayout({ children }) {
       <body className="bg-gray-950 text-gray-100 min-h-screen">
         <Providers session={session}>
           <div className="flex flex-col lg:flex-row min-h-screen">
-            {isLoggedIn && <Sidebar user={session?.user ?? null} />}
+            {isLoggedIn && <Sidebar />}
             <main className="flex-1 min-w-0 flex flex-col">{children}</main>
           </div>
         </Providers>

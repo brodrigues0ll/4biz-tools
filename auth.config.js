@@ -8,19 +8,21 @@ export const authConfig = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.session   = user.session;
-        token.authToken = user.authToken;
-        token.username  = user.username;
-        // name e email já são campos padrão do token Next-Auth
-        token.name      = user.name;
-        token.email     = user.email;
+        token.session     = user.session;
+        token.authToken   = user.authToken;
+        token.username    = user.username;
+        token.name        = user.name;
+        token.email       = user.email;
+        token.permissions = user.permissions;
+        token.isAdmin     = user.isAdmin;
       }
       return token;
     },
     session({ session, token }) {
-      session.session   = token.session;
-      session.authToken = token.authToken;
-      // Garante que os dados do usuário decodificados do JWT chegam ao cliente
+      session.session     = token.session;
+      session.authToken   = token.authToken;
+      session.permissions = token.permissions ?? null;
+      session.isAdmin     = token.isAdmin ?? false;
       session.user = {
         name:     token.name     ?? session.user?.name     ?? "",
         email:    token.email    ?? session.user?.email    ?? "",
