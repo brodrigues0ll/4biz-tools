@@ -50,3 +50,9 @@ next-env.d.ts
 /scripts
 
 conversa-gpt.md
+
+generate_manual.py
+manual_usuario.pdf
+_manual_screenshots
+__pycache__
+CRED_SCREENSHOT.txt
