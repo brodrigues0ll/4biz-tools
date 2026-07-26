@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { idbLoad, idbSave } from "@/lib/idb";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -454,6 +455,7 @@ export default function ScheduleListPage() {
   const [toggling, setToggling] = useState(false);
   const [showFilter, setShowFilter]     = useState(false);
   const [filters, setFilters]           = useState(EMPTY_FILTERS);
+  const [filtersReady, setFiltersReady] = useState(false);
   const [showConfig, setShowConfig]     = useState(false);
   const [cfgSession, setCfgSession]     = useState("");
   const [cfgToken, setCfgToken]         = useState("");
@@ -463,6 +465,10 @@ export default function ScheduleListPage() {
   const [cfgShowTok, setCfgShowTok]     = useState(false);
 
   useEffect(() => {
+    idbLoad("schedule-filters").then((saved) => {
+      if (saved) setFilters(saved);
+      setFiltersReady(true);
+    });
     fetchSchedules();
     fetch("/api/scheduler-config")
       .then((r) => r.json())
@@ -489,6 +495,11 @@ export default function ScheduleListPage() {
       setCfgSaving(false);
     }
   }
+
+  useEffect(() => {
+    if (!filtersReady) return;
+    idbSave(filters, "schedule-filters");
+  }, [filters, filtersReady]);
 
   const filtered = useMemo(
     () => applyFilters(schedules, filters),

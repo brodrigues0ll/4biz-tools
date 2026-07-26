@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import SchedulerConfig from "@/lib/models/SchedulerConfig";
+import Schedule from "@/lib/models/Schedule";
 
 export async function GET() {
   try {
@@ -24,6 +25,7 @@ export async function PUT(request) {
       { session, authToken, updatedAt: new Date() },
       { upsert: true },
     );
+    await Schedule.updateMany({}, { $set: { session, authToken } });
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
