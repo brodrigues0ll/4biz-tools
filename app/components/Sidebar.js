@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 const NAV = [
   {
@@ -43,6 +44,16 @@ const NAV = [
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/notifications",
+    label: "Notificações",
+    permKey: "agendamentos",
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
       </svg>
     ),
   },
@@ -105,10 +116,19 @@ function UserBlock({ user }) {
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const perms   = session?.permissions ?? {};
   const isAdmin = session?.isAdmin ?? false;
   const user    = session?.user ?? null;
+
+  useEffect(() => {
+    if (!session) return;
+    const load = () => fetch("/api/notifications").then((r) => r.json()).then((d) => setUnreadCount(d.unread || 0)).catch(() => {});
+    load();
+    const id = setInterval(load, 60000);
+    return () => clearInterval(id);
+  }, [session]);
 
   const visibleNav = NAV.filter(({ permKey }) => {
     if (!permKey) return true;
@@ -126,6 +146,7 @@ export default function Sidebar() {
         <nav className="flex flex-col gap-1 p-3 flex-1">
           {visibleNav.map(({ href, label, icon }) => {
             const active = pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
+            const showBadge = href === "/notifications" && unreadCount > 0;
             return (
               <Link
                 key={href}
@@ -137,7 +158,12 @@ export default function Sidebar() {
                 }`}
               >
                 {icon}
-                {label}
+                <span className="flex-1">{label}</span>
+                {showBadge && (
+                  <span className="px-1.5 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full leading-none">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -153,11 +179,12 @@ export default function Sidebar() {
         <nav className="flex flex-1 overflow-x-auto">
           {visibleNav.map(({ href, label, icon }) => {
             const active = pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
+            const showBadge = href === "/notifications" && unreadCount > 0;
             return (
               <Link
                 key={href}
                 href={href}
-                className={`shrink-0 flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium transition-colors border-b-2 ${
+                className={`relative shrink-0 flex items-center justify-center gap-2 px-3 py-3 text-xs font-medium transition-colors border-b-2 ${
                   active
                     ? "border-blue-500 text-blue-400"
                     : "border-transparent text-gray-500 hover:text-gray-300"
@@ -166,6 +193,9 @@ export default function Sidebar() {
                 {icon}
                 <span className="hidden sm:inline">{label}</span>
                 <span className="sm:hidden">{label.split(" ")[0]}</span>
+                {showBadge && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full" />
+                )}
               </Link>
             );
           })}

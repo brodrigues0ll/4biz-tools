@@ -691,14 +691,16 @@ export default function EditSchedulePage() {
 
             {/* Técnico Responsável */}
             <div className="sm:col-span-2">
-              <span className="text-xs text-gray-400 mb-1 block">Técnico Responsável <span className="text-gray-600">(opcional — delegação automática)</span></span>
+              <span className="text-xs text-gray-400 mb-1 block">
+                Técnico Responsável <span className="text-red-500">*</span>
+              </span>
               <div className="relative">
                 <input type="text" value={tec.query}
                   onChange={(e) => tec.search(e.target.value)}
                   onFocus={() => tec.items.length > 0 && tec.setOpen(true)}
                   placeholder={noAuth ? "Configure a autenticação" : "Buscar técnico…"}
                   disabled={noAuth}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+                  className={`w-full bg-gray-800 border rounded-lg px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500 disabled:opacity-40 ${!selectedTecnico && idbReady ? "border-yellow-700/60" : "border-gray-700"}`}
                 />
                 {tec.loading && <span className="absolute right-3 top-1.5 text-gray-500 text-xs">…</span>}
                 {tec.open && tec.items.length > 0 && (
@@ -714,7 +716,7 @@ export default function EditSchedulePage() {
                   </div>
                 )}
               </div>
-              {selectedTecnico && (
+              {selectedTecnico ? (
                 <div className="mt-1.5 flex items-center gap-2 bg-blue-950/50 border border-blue-800/50 rounded-lg px-3 py-1.5">
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-blue-200 truncate">{selectedTecnico.nome}</div>
@@ -723,6 +725,12 @@ export default function EditSchedulePage() {
                   <button type="button" onClick={() => { setSelectedTecnico(null); tec.setQuery(""); }}
                     className="text-blue-500 hover:text-blue-300 text-xs shrink-0">limpar</button>
                 </div>
+              ) : (
+                idbReady && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    Sem técnico, o agendamento será salvo mas não será executado pelo scheduler.
+                  </p>
+                )
               )}
             </div>
 
