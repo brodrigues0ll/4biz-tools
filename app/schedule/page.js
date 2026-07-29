@@ -107,6 +107,30 @@ function RunModal({ schedule, onConfirm, onClose, running }) {
   );
 }
 
+// ── Modal de confirmação genérico ─────────────────────────────────────────────
+
+function ConfirmModal({ title, message, confirmLabel, confirmClass, onConfirm, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative bg-gray-900 border border-gray-700 rounded-xl shadow-2xl w-full max-w-sm p-6">
+        <h2 className="text-sm font-semibold text-white mb-2">{title}</h2>
+        <p className="text-xs text-gray-400 mb-6">{message}</p>
+        <div className="flex gap-3">
+          <button onClick={onConfirm}
+            className={`flex-1 py-2 text-white text-xs font-semibold rounded-lg transition-colors ${confirmClass}`}>
+            {confirmLabel}
+          </button>
+          <button onClick={onClose}
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold rounded-lg border border-gray-700 transition-colors">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Filter helpers ────────────────────────────────────────────────────────────
 
 const EMPTY_FILTERS = {
@@ -453,6 +477,7 @@ export default function ScheduleListPage() {
   const [runTarget, setRunTarget] = useState(null);
   const [running, setRunning] = useState(false);
   const [toggling, setToggling] = useState(false);
+  const [confirmToggle, setConfirmToggle] = useState(null); // 'ativar' | 'pausar' | null
   const [showFilter, setShowFilter]     = useState(false);
   const [filters, setFilters]           = useState(EMPTY_FILTERS);
   const [filtersReady, setFiltersReady] = useState(false);
@@ -585,6 +610,19 @@ export default function ScheduleListPage() {
         />
       )}
 
+      {confirmToggle && (
+        <ConfirmModal
+          title={confirmToggle === "ativar" ? "Ativar todos os agendamentos?" : "Pausar todos os agendamentos?"}
+          message={confirmToggle === "ativar"
+            ? "Todos os agendamentos serão ativados e voltarão a executar normalmente."
+            : "Todos os agendamentos serão pausados e não executarão até serem reativados."}
+          confirmLabel={confirmToggle === "ativar" ? "Sim, ativar todos" : "Sim, pausar todos"}
+          confirmClass={confirmToggle === "ativar" ? "bg-green-600 hover:bg-green-500" : "bg-gray-700 hover:bg-gray-600"}
+          onConfirm={() => { handleToggleAll(confirmToggle === "ativar"); setConfirmToggle(null); }}
+          onClose={() => setConfirmToggle(null)}
+        />
+      )}
+
       {showFilter && (
         <FilterModal
           schedules={schedules}
@@ -705,14 +743,14 @@ export default function ScheduleListPage() {
             </button>
 
             <button
-              onClick={() => handleToggleAll(true)}
+              onClick={() => setConfirmToggle("ativar")}
               disabled={toggling || schedules.every((s) => s.ativo)}
               className="px-3 py-1.5 bg-green-700 hover:bg-green-600 disabled:opacity-40 disabled:cursor-default text-white text-xs font-medium rounded-lg transition-colors"
             >
               {toggling ? "…" : "Ativar todos"}
             </button>
             <button
-              onClick={() => handleToggleAll(false)}
+              onClick={() => setConfirmToggle("pausar")}
               disabled={toggling || schedules.every((s) => !s.ativo)}
               className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-default border border-gray-700 text-gray-300 text-xs font-medium rounded-lg transition-colors"
             >
