@@ -10,6 +10,16 @@ const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const MESES       = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const HORAS       = Array.from({ length: 24 }, (_, i) => i);
 const MINUTOS     = Array.from({ length: 12 }, (_, i) => i * 5);
+const ORIGENS_CONTATO = [
+  { id: 10, label: "E-mail" },
+  { id: 11, label: "0800" },
+  { id: 12, label: "Portal" },
+  { id: 13, label: "Presencialmente" },
+  { id: 14, label: "Chat" },
+  { id: 15, label: "Outros" },
+  { id: 16, label: "Monitoramento" },
+  { id: 19, label: "Integração" },
+];
 
 const DEFAULT_DESC_PLAIN =
   "Implementação da solução LAPS (Local Administrator Password Solution) no dispositivo {{patrimonio}}, conforme políticas de Segurança da Informação.\nAtividades realizadas:\n• Exclusão dos perfis de administradores locais existentes;\n• Manutenção apenas da conta padrão Administrador, visando conformidade com a política;\n• Inclusão do equipamento no grupo de gerenciamento do LAPS;\n• Atualização da planilha de controle conforme procedimento interno.\n\nAdequação do equipamento às diretrizes de segurança, garantindo o gerenciamento seguro da senha do administrador local e a mitigação de riscos.";
@@ -32,7 +42,7 @@ const BASE_TEMPLATE = {
   idUsuarioResponsavelAtual: 964, responsavel: "Bernardo Rodrigues Gomes",
   solicitante: "", idSolicitante: null, telefone: "", ramal: null, email: "",
   idUnidade: null, unidade: "", templates: [],
-  origemContato: 14, idServico: null, tipo: "R",
+  origemContato: 12, idServico: null, tipo: "R",
   idServicoNegocioTecnico: null, nomeServico: "",
   idAcordoNivelServico: 3, sla: "24:00", slaColor: "#017301",
   descricao: "",
@@ -257,6 +267,7 @@ export default function NewSchedulePage() {
   const [minuto, setMinuto]         = useState(0);
   const [unidadesAgendamento, setUnidadesAgendamento] = useState([]);
   const [patrimonioFixo, setPatrimonioFixo] = useState("");
+  const [origemContato, setOrigemContato] = useState(12);
 
   // UI
   const [saving, setSaving]     = useState(false);
@@ -303,6 +314,7 @@ export default function NewSchedulePage() {
         if (draft.selectedKnowledges)    setSelectedKnowledges(draft.selectedKnowledges);
         if (draft.selectedGroup)       { setSelectedGroup(draft.selectedGroup);             grp.setQuery(draft.selectedGroup.nome); }
         if (draft.selectedTecnico)     { setSelectedTecnico(draft.selectedTecnico);         tec.setQuery(draft.selectedTecnico.nome); }
+        if (draft.origemContato !== undefined) { setOrigemContato(draft.origemContato); patch({ origemContato: draft.origemContato }); }
       }
 
       setIdbReady(true);
@@ -314,14 +326,14 @@ export default function NewSchedulePage() {
     if (!idbReady) return;
     idbSave({
       nome, frequencia, diasSemana, diaMes, mes, hora, minuto,
-      unidadesAgendamento, patrimonioFixo,
+      unidadesAgendamento, patrimonioFixo, origemContato,
       descricao, template,
       selectedSolicitante, selectedActivity, selectedUnidade,
       selectedKnowledges, selectedGroup, selectedTecnico,
     }, "schedule-draft");
   }, [
     nome, frequencia, diasSemana, diaMes, mes, hora, minuto,
-    unidadesAgendamento, patrimonioFixo,
+    unidadesAgendamento, patrimonioFixo, origemContato,
     descricao, template,
     selectedSolicitante, selectedActivity, selectedUnidade,
     selectedKnowledges, selectedGroup, selectedTecnico,
@@ -754,6 +766,16 @@ export default function NewSchedulePage() {
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500"
               />
               <p className="text-xs text-gray-600 mt-1">Substitui <span className="font-mono text-yellow-500/70">{"{{patrimonio}}"}</span> nos chamados.</p>
+            </div>
+
+            {/* Origem do Contato */}
+            <div>
+              <span className="text-xs text-gray-400 mb-1 block">Origem do Contato</span>
+              <select value={origemContato}
+                onChange={(e) => { const v = Number(e.target.value); setOrigemContato(v); patch({ origemContato: v }); }}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500">
+                {ORIGENS_CONTATO.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+              </select>
             </div>
 
             {/* Fila / Grupo */}

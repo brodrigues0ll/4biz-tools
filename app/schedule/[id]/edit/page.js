@@ -10,6 +10,16 @@ const DIAS_SEMANA = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const MESES       = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const HORAS       = Array.from({ length: 24 }, (_, i) => i);
 const MINUTOS     = Array.from({ length: 12 }, (_, i) => i * 5);
+const ORIGENS_CONTATO = [
+  { id: 10, label: "E-mail" },
+  { id: 11, label: "0800" },
+  { id: 12, label: "Portal" },
+  { id: 13, label: "Presencialmente" },
+  { id: 14, label: "Chat" },
+  { id: 15, label: "Outros" },
+  { id: 16, label: "Monitoramento" },
+  { id: 19, label: "Integração" },
+];
 
 function descPlainToHtml(text) {
   return "<div>" + text.trim().replace(/\n/g, "<br>") + "</div>";
@@ -175,6 +185,7 @@ export default function EditSchedulePage() {
   const [todasUnidades, setTodasUnidades] = useState(false);
   const [unidadesAgendamento, setUnidadesAgendamento] = useState([]);
   const [patrimonioFixo, setPatrimonioFixo] = useState("");
+  const [origemContato, setOrigemContato] = useState(12);
 
   // UI
   const [loadError, setLoadError] = useState("");
@@ -268,6 +279,9 @@ export default function EditSchedulePage() {
           setSelectedGroup(g);
           grp.setQuery(g.nome);
         }
+
+        // Origem do contato
+        if (t.origemContato) setOrigemContato(t.origemContato);
       } catch { /* templateStr inválido */ }
     }).catch(() => setLoadError("Não foi possível carregar o agendamento."));
   }, [id]);
@@ -652,6 +666,16 @@ export default function EditSchedulePage() {
                 placeholder="Vazio = usa sigla da localidade"
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500" />
               <p className="text-xs text-gray-600 mt-1">Substitui <span className="font-mono text-yellow-500/70">{"{{patrimonio}}"}</span> nos chamados.</p>
+            </div>
+
+            {/* Origem do Contato */}
+            <div>
+              <span className="text-xs text-gray-400 mb-1 block">Origem do Contato</span>
+              <select value={origemContato}
+                onChange={(e) => { const v = Number(e.target.value); setOrigemContato(v); patch({ origemContato: v }); }}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500">
+                {ORIGENS_CONTATO.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+              </select>
             </div>
 
             {/* Fila / Grupo */}
