@@ -268,7 +268,7 @@ export default function EditSchedulePage() {
 
         // Técnico
         if (sched.tecnico?.id) {
-          const tecObj = { idEmpregado: sched.tecnico.id, nome: sched.tecnico.nome, email: "" };
+          const tecObj = { idEmpregado: sched.tecnico.id, nome: sched.tecnico.nome, email: sched.tecnico.email || "" };
           setSelectedTecnico(tecObj);
           tec.setQuery(sched.tecnico.nome);
         }
@@ -398,7 +398,7 @@ export default function EditSchedulePage() {
           nome, frequencia, diasSemana, diaMes, mes, hora, minuto,
           todasUnidades, unidades: unidadesAgendamento, patrimonioFixo,
           session, authToken, templateStr,
-          tecnico: selectedTecnico ? { id: selectedTecnico.idEmpregado, nome: selectedTecnico.nome } : null,
+          tecnico: selectedTecnico ? { id: selectedTecnico.idEmpregado, nome: selectedTecnico.nome, email: selectedTecnico.email || "" } : null,
         }),
       });
       const data = await res.json();

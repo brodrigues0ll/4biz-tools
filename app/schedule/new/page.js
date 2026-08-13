@@ -459,7 +459,7 @@ export default function NewSchedulePage() {
           nome, frequencia, diasSemana, diaMes, mes, hora, minuto,
           todasUnidades: false, unidades: unidadesAgendamento, patrimonioFixo,
           session, authToken, templateStr,
-          tecnico: selectedTecnico ? { id: selectedTecnico.idEmpregado, nome: selectedTecnico.nome } : null,
+          tecnico: selectedTecnico ? { id: selectedTecnico.idEmpregado, nome: selectedTecnico.nome, email: selectedTecnico.email || "" } : null,
         }),
       });
       const data = await res.json();
