@@ -173,6 +173,7 @@ export default function EditSchedulePage() {
   const [selectedKnowledges, setSelectedKnowledges]   = useState([]);
   const [selectedGroup, setSelectedGroup]             = useState(null);
   const [selectedTecnico, setSelectedTecnico]         = useState(null);
+  const [tecnicoUsarId, setTecnicoUsarId]             = useState(false);
 
   // Campos de agendamento
   const [nome, setNome]                   = useState("");
@@ -271,6 +272,7 @@ export default function EditSchedulePage() {
           const tecObj = { idEmpregado: sched.tecnico.id, nome: sched.tecnico.nome, email: sched.tecnico.email || "" };
           setSelectedTecnico(tecObj);
           tec.setQuery(sched.tecnico.nome);
+          if (sched.tecnico.usarId) setTecnicoUsarId(true);
         }
 
         // Fila/grupo
@@ -398,7 +400,7 @@ export default function EditSchedulePage() {
           nome, frequencia, diasSemana, diaMes, mes, hora, minuto,
           todasUnidades, unidades: unidadesAgendamento, patrimonioFixo,
           session, authToken, templateStr,
-          tecnico: selectedTecnico ? { id: selectedTecnico.idEmpregado, nome: selectedTecnico.nome, email: selectedTecnico.email || "" } : null,
+          tecnico: selectedTecnico ? { id: selectedTecnico.idEmpregado, nome: selectedTecnico.nome, email: selectedTecnico.email || "", usarId: tecnicoUsarId } : null,
         }),
       });
       const data = await res.json();
@@ -715,9 +717,16 @@ export default function EditSchedulePage() {
 
             {/* Técnico Responsável */}
             <div className="sm:col-span-2">
-              <span className="text-xs text-gray-400 mb-1 block">
-                Técnico Responsável <span className="text-red-500">*</span>
-              </span>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-gray-400">
+                  Técnico Responsável <span className="text-red-500">*</span>
+                </span>
+                <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                  <input type="checkbox" checked={tecnicoUsarId} onChange={(e) => setTecnicoUsarId(e.target.checked)}
+                    className="w-3.5 h-3.5 accent-blue-500 cursor-pointer" />
+                  <span className="text-xs text-gray-500">Usar ID</span>
+                </label>
+              </div>
               <div className="relative">
                 <input type="text" value={tec.query}
                   onChange={(e) => tec.search(e.target.value)}
@@ -744,7 +753,10 @@ export default function EditSchedulePage() {
                 <div className="mt-1.5 flex items-center gap-2 bg-blue-950/50 border border-blue-800/50 rounded-lg px-3 py-1.5">
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-blue-200 truncate">{selectedTecnico.nome}</div>
-                    {selectedTecnico.email && <div className="text-xs text-blue-400 truncate">{selectedTecnico.email}</div>}
+                    {tecnicoUsarId
+                      ? <div className="text-xs text-blue-400">ID: {selectedTecnico.idEmpregado}</div>
+                      : selectedTecnico.email && <div className="text-xs text-blue-400 truncate">{selectedTecnico.email}</div>
+                    }
                   </div>
                   <button type="button" onClick={() => { setSelectedTecnico(null); tec.setQuery(""); }}
                     className="text-blue-500 hover:text-blue-300 text-xs shrink-0">limpar</button>
